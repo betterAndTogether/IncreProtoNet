@@ -11,7 +11,7 @@ Relation Classification
 
 ## Model Architecture
 
-![model][model.png]
+![image](https://github.com/betterAndTogether/IncreProtoNet/blob/main/model.png)
 
 ## Usage 
 
