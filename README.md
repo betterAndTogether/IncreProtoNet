@@ -4,10 +4,10 @@ Relation Classification" in COLING2020 (to be appear)
 
 ## Requirements 
 
-* 'pytorch = 1.0.1'
-* 'json'
-* 'argparse'
-* 'sklearn'
+* `pytorch = 1.0.1`
+* `json`
+* `argparse`
+* `sklearn`
 
 ## Model Architecture
 
