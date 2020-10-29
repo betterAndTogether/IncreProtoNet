@@ -67,25 +67,15 @@ def main():
             glove_word2id = json.load(open(path_util.from_project_root("data/pretrain/glove/glove_word2id.json")))
         except:
             raise Exception("Cannot find glove files. Run glove/download_glove.sh to download glove files.")
-        if opt.dataset == "simQ":
-            sentence_encoder = CNNSentenceEncoder_simQ(
-                glove_mat,
-                glove_word2id,
-                max_length, hidden_size=opt.cnn_hidden_size)
-        else:
-            sentence_encoder = CNNSentenceEncoder(
-                glove_mat,
-                glove_word2id,
-                max_length, hidden_size=opt.cnn_hidden_size)
+
+        sentence_encoder = CNNSentenceEncoder(
+            glove_mat,
+            glove_word2id,
+            max_length, hidden_size=opt.cnn_hidden_size)
 
     elif embedding_type == "bert":
         pretrain_ckpt = opt.pretrain_ckpt or 'bert-base-uncased'
-        if opt.dataset == "simQ":
-            sentence_encoder = BERTSentenceEncoder_simQ(pretrain_ckpt, max_length, opt.word_embedding_dim,
-                                                   opt.cnn_hidden_size,
-                                                   opt.pos_embedding_dim)
-        else:
-            sentence_encoder = BERTSentenceEncoder(pretrain_ckpt, max_length, opt.word_embedding_dim, opt.cnn_hidden_size,
+        sentence_encoder = BERTSentenceEncoder(pretrain_ckpt, max_length, opt.word_embedding_dim, opt.cnn_hidden_size,
                                                    opt.pos_embedding_dim)
         bert_optim = True
 
@@ -93,12 +83,8 @@ def main():
     """
         data loader生成
     """
-    if opt.dataset == "simQ":
-        train_data_loader = get_loader_simQ(train_data_file, baserel2index_file, sentence_encoder, batch_size)
-        test_data_loader = get_loader_simQ(test_data_file, baserel2index_file, sentence_encoder, batch_size)
-    else:
-        train_data_loader = get_loader(train_data_file, baserel2index_file, sentence_encoder, batch_size)
-        test_data_loader = get_loader(test_data_file, baserel2index_file, sentence_encoder, batch_size)
+    train_data_loader = get_loader(train_data_file, baserel2index_file, sentence_encoder, batch_size)
+    test_data_loader = get_loader(test_data_file, baserel2index_file, sentence_encoder, batch_size)
 
     """
         搭建framework
@@ -110,7 +96,7 @@ def main():
     # save model
     if not os.path.exists('checkpoint'):
         os.mkdir('checkpoint')
-    ckpt = 'checkpoint/{}.pth.tar'.format("deepProto-{}-lr-{}-pl-{}-{}-v3".format(embedding_type, opt.lr, opt.pl_weight, opt.dataset))
+    ckpt = 'checkpoint/{}.pth.tar'.format("deepProto-{}-lr-{}-pl-{}-{}".format(embedding_type, opt.lr, opt.pl_weight, opt.dataset))
 
     if torch.cuda.is_available():
         model.cuda()
