@@ -15,4 +15,10 @@ Relation Classification" in COLING 2020
 
 ## Usage 
 
+### BaseModel Training
+
+
+
+### Incremental Model Training 
+
 The code will be upload soon!

@@ -1,0 +1,9 @@
+.idea
+uncased_L-12_H-768_A-12/
+runs/
+_processed_data/
+BaseModel/checkpoint
+data/pretrain
+data/pic
+BaseModel.zip
+IncrementalFewShotModel/checkpoint
