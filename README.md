@@ -8,6 +8,7 @@ Relation Classification" in COLING 2020
 * `json`
 * `argparse`
 * `sklearn`
+* `transformers`
 
 ## Model Architecture
 

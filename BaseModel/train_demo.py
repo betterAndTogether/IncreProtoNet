@@ -11,10 +11,7 @@ import torch
 from utils import path_util
 from BaseModel.layers.sentence_encoder import CNNSentenceEncoder
 from BaseModel.layers.sentence_encoder import BERTSentenceEncoder
-from BaseModel.layers.sentence_encoder_simQ import CNNSentenceEncoder as CNNSentenceEncoder_simQ
-from BaseModel.layers.sentence_encoder_simQ import BERTSentenceEncoder as BERTSentenceEncoder_simQ
 from BaseModel.layers.data_loader import get_loader
-from BaseModel.layers.data_loader_simQ import get_loader as get_loader_simQ
 from BaseModel.layers.DeepProtoNet import DeepProto
 from BaseModel.layers.framework import BaseREFramework
 
