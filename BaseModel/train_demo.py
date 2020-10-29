@@ -23,7 +23,7 @@ def main():
     """
     parser.add_argument("--num_rels", default=54, help="number of relations")
     parser.add_argument("--batch_size", default=100, help="batch_size")
-    parser.add_argument("--max_length", default=40, help="max_length")
+    parser.add_argument("--max_length", default=80, help="max_length")
     parser.add_argument("--word_embedding_dim", default=768, help="word embedding size")
     parser.add_argument("--cnn_hidden_size", default=230, help="cnn_hidden_size")
     parser.add_argument("--pos_embedding_dim", default=5, help="position embedding size")
