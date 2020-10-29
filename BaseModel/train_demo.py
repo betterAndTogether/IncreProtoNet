@@ -26,7 +26,7 @@ def main():
     """
     parser.add_argument("--num_rels", default=54, help="number of relations")
     parser.add_argument("--batch_size", default=100, help="batch_size")
-    parser.add_argument("--max_length", default=80, help="max_length")
+    parser.add_argument("--max_length", default=40, help="max_length")
     parser.add_argument("--word_embedding_dim", default=768, help="word embedding size")
     parser.add_argument("--cnn_hidden_size", default=230, help="cnn_hidden_size")
     parser.add_argument("--pos_embedding_dim", default=5, help="position embedding size")
@@ -44,21 +44,8 @@ def main():
     parser.add_argument("--base_test_file", default="data/fewrel/base_test_fewrel.json", help="base data test path")
     parser.add_argument("--baserel2index_file", default="data/fewrel/baserel2index.json", help="base2index file")
 
-    # webnlg
-    # parser.add_argument("--dataset", default="webnlg", help="base data train path")
-    # parser.add_argument("--base_train_file", default="data/webnlg/base_train_webnlg.json", help="base data train path")
-    # parser.add_argument("--base_test_file", default="data/webnlg/base_test_webnlg.json", help="base data test path")
-    # parser.add_argument("--baserel2index_file", default="data/webnlg/baserel2index.json", help="base2index file")
-
-    # tacred
-    # parser.add_argument("--dataset", default="tacred", help="base data train path")
-    # parser.add_argument("--base_train_file", default="data/tacred/base_train.json", help="base data train path")
-    # parser.add_argument("--base_test_file", default="data/tacred/base_test.json", help="base data test path")
-    # parser.add_argument("--baserel2index_file", default="data/tacred/baserel2index.json", help="base2index file")
-    #
     parser.add_argument('--load_ckpt', default=None, help='load ckpt')
     parser.add_argument('--save_ckpt', default=None, help='save ckpt')
-
 
     opt = parser.parse_args()
     batch_size = opt.batch_size
