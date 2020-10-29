@@ -27,7 +27,7 @@ def main():
     # shared parameter
     parser.add_argument("--baseNumRels", default=54, type=int, help="number of relations")
     parser.add_argument("--embedding_type", default="bert", type=str, help="bert or glove")
-    parser.add_argument("--max_length", default=80, help="max_length")
+    parser.add_argument("--max_length", default=40, type=int, help="max_length")
     parser.add_argument("--cnn_hidden_size", default=230, help="cnn_hidden_size")
     parser.add_argument("--word_embedding_dim", default=768, help="word embedding size")
     parser.add_argument("--pos_embedding_dim", default=5, help="position embedding size")

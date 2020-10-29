@@ -96,7 +96,7 @@ def main():
     # save model
     if not os.path.exists('checkpoint'):
         os.mkdir('checkpoint')
-    ckpt = 'checkpoint/{}.pth.tar'.format("deepProto-{}-lr-{}-pl-{}-{}".format(embedding_type, opt.lr, opt.pl_weight, opt.dataset))
+    ckpt = 'checkpoint/{}.pth.tar'.format("deepProto-{}-lr-{}-pl-{}".format(embedding_type, opt.lr, opt.pl_weight))
 
     if torch.cuda.is_available():
         model.cuda()
