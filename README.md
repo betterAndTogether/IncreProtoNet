@@ -32,7 +32,6 @@ and put it under the data directory. Then run `tar xvf pretrain.tar` to decompre
 ```bash
  python3 train_demo.py --dataset fewrel --embedding_type bert --lr 1e-2
 ```
-
 **Result**
 
 |embedding_type| learn_rate | pl_weight| train_iter |  ACC    | 
