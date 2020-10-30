@@ -89,7 +89,7 @@ def main():
         is_bert = True
         # basemodel_ckpt = opt.basemodel_ckpt + "deepProto-bert-80.pth.tar"
         # fewrel
-        basemodel_ckpt = opt.basemodel_ckpt + "deepProto-{}-lr-{}-pl-{}-iter-{}.pth.tar".format("bert", opt.base_lr, opt.pl_weight, opt.base_train_iter)
+        basemodel_ckpt = opt.basemodel_ckpt + "deepProto-{}-lr-{}-pl-{}.pth.tar".format("bert", opt.base_lr, opt.pl_weight)
 
     baseModel_ckpt = from_project_root(basemodel_ckpt)
 
