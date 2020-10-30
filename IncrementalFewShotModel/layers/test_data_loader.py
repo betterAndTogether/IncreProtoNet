@@ -51,7 +51,6 @@ class FewRelDataset(data.Dataset):
         base_query_set = {'word': [], 'pos1': [], 'pos2': [], 'mask': []}
         base_query_label = []
 
-
         # 随机抽取baseN个关系作为baseRels
         baseClasses = random.sample(self.base_classes, self.baseN)
         # 随机抽取novelN个关系作为novelRels

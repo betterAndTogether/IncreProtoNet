@@ -14,12 +14,11 @@ from BaseModel.layers.sentence_encoder import BERTSentenceEncoder
 from BaseModel.layers.DeepProtoNet import DeepProto
 from IncrementalFewShotModel.layers.train_data_loader import get_loader as train_get_loader
 from IncrementalFewShotModel.layers.test_data_loader import get_loader as test_get_loader
-
-
 from IncrementalFewShotModel.layers.IncreFewProtoNet import IncreProto
 from IncrementalFewShotModel.layers.framework import IncreFewShotREFramework
 from IncrementalFewShotModel.layers.PrototypeGenerator import base_topk_selector
 from IncrementalFewShotModel.layers.MetaCNNEncoder import MetaCNN
+
 
 def main():
 
@@ -128,7 +127,6 @@ def main():
     """
         生成data_loader
     """
-
     train_data_loader = train_get_loader(train_data_path, baseRel2index_path, sentence_encoder, opt.batch_size, opt.train_baseN,
                                    opt.train_novelN, opt.K, opt.train_Q, opt.triplet_num, opt.bi_pos_num, opt.bi_neg_num)
     test_data_loader = test_get_loader(test_baseData_path, test_novelData_path, baseRel2index_path, sentence_encoder,

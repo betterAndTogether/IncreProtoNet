@@ -41,17 +41,16 @@ class FewRelDataset(data.Dataset):
 
     def __getitem__(self, index):
 
-        novelSupport_set = {'word':[], 'pos1':[], 'pos2':[], 'mask':[]}
+        novelSupport_set = {'word': [], 'pos1': [], 'pos2': [], 'mask': []}
         base_label = []  # 不构建支持样本，但构建存在哪些baseRels
-        query_set = {'word':[], 'pos1':[], 'pos2':[], 'mask':[]}
+        query_set = {'word': [], 'pos1': [], 'pos2': [], 'mask': []}
         query_label = []
-        novel_query_set = {'word':[], 'pos1':[], 'pos2':[], 'mask':[]}
+        novel_query_set = {'word': [], 'pos1': [], 'pos2': [], 'mask': []}
         novel_query_label = []
-        base_query_set = {'word':[], 'pos1':[], 'pos2':[], 'mask':[]}
+        base_query_set = {'word': [], 'pos1': [], 'pos2': [], 'mask': []}
         base_query_label = []
-        triplet_base_set = {'word':[], 'pos1':[], 'pos2':[], 'mask':[]}
-        triplet_novel_set = {'word':[], 'pos1':[], 'pos2':[], 'mask':[]}
-
+        triplet_base_set = {'word': [], 'pos1': [], 'pos2': [], 'mask': []}
+        triplet_novel_set = {'word': [], 'pos1': [], 'pos2': [], 'mask': []}
 
         # 随机抽取baseN个关系作为baseRels
         baseClasses = random.sample(self.classes, self.baseN)
@@ -84,6 +83,7 @@ class FewRelDataset(data.Dataset):
             构建novelRels Support Set
         """
         startLabelIndex = len(baseClasses)
+
         for i, class_name in enumerate(novelClasses):
 
             indices = np.random.choice(list(range(len(self.json_data[class_name]))), self.K + self.Q, False)
@@ -231,7 +231,6 @@ def collate_fn(data):
             batch_triplet_base[k] += triplet_base_set[i][k]
         for k in triplet_novel_set[i]:
             batch_triplet_novel[k] += triplet_novel_set[i][k]
-
 
         batch_queryLabel += query_label[i]
         batch_baseLabel += base_label[i]

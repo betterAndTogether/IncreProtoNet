@@ -21,15 +21,15 @@ def main():
     """
         experimental settting
     """
-    parser.add_argument("--num_rels", default=54, help="number of relations")
-    parser.add_argument("--batch_size", default=100, help="batch_size")
-    parser.add_argument("--max_length", default=40, help="max_length")
-    parser.add_argument("--word_embedding_dim", default=768, help="word embedding size")
-    parser.add_argument("--cnn_hidden_size", default=230, help="cnn_hidden_size")
-    parser.add_argument("--pos_embedding_dim", default=5, help="position embedding size")
+    parser.add_argument("--num_rels", default=54, type=int, help="number of relations")
+    parser.add_argument("--batch_size", default=100, type=int, help="batch_size")
+    parser.add_argument("--max_length", default=40, type=int, help="max_length")
+    parser.add_argument("--word_embedding_dim", default=768, type=int, help="word embedding size")
+    parser.add_argument("--cnn_hidden_size", default=230, type=int, help="cnn_hidden_size")
+    parser.add_argument("--pos_embedding_dim", default=5, type=int, help="position embedding size")
     parser.add_argument("--pl_weight", default=1e-1, type=float, help="the weight for the prototype loss")
     parser.add_argument("--lr", default=1e-2, type=float, help="initial learning rate")
-    parser.add_argument("--train_iter", default=25000, help="iterate steps in training")
+    parser.add_argument("--train_iter", default=25000, type=int, help="iterate steps in training")
     parser.add_argument("--val_step", default=1000, type=int, help="evaluation steps")
     parser.add_argument("--val_iter", default=500, type=int, help="iterate steps in validation")
 

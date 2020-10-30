@@ -45,11 +45,13 @@ and put it under the data directory. Then run `tar xvf pretrain.tar` to decompre
 **Glove Embedding Command**
 #### 1-shot 
 ```bash
-Available later
+python3.6 train_demo.py --embedding_type glove --pl_weight 0.1 \
+--base_lr 0.1 --train_baseN 30 --triplet_num 10 --margin 5.0 \
+--learn_rate 1e-1 --K 1
 ```
 #### 5-shot
 ```bash
-python3.6 train_demo.py  --embedding_type glove --pl_weight 0.1 \
+python3.6 train_demo.py --embedding_type glove --pl_weight 0.1 \
 --base_lr 0.1 --train_baseN 30 --triplet_num 10 --margin 5.0 \
 --learn_rate 1e-1 --K 5
 ```
@@ -61,7 +63,9 @@ python3.6 train_demo.py  --embedding_type glove --pl_weight 0.1 \
 **BERT Embedding Command**
 #### 1-shot 
 ```bash
-Available later
+python3.6 train_demo.py --embedding_type bert --pl_weight 0.1 \
+--base_lr 0.01 --train_baseN 30 --triplet_num 10 --margin 5.0 \
+--learn_rate 1e-2 --K 1 --val_step 100 --val_iter 500
 ```
 #### 5-shot
 ```bash
