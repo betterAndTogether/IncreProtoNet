@@ -330,9 +330,6 @@ class IncreProto(framework.IncreFewShotREModel):
         novel_acc = torch.mean((novel_preds.view(-1) == novel_query_label.view(-1)).type(torch.FloatTensor))
         novel_loss = self.softmax_loss(novel_logits, novel_query_label)
 
-        # prototype loss
-
-
         return novel_radius, novel_prototypes, novel_loss, novel_acc
 
     def base_bi_classifier(self, base_query, base_query_label, base_label, baseN, biQ, hidden_size):
