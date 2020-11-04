@@ -23,6 +23,9 @@ Please download `pretrain.tar` from [Tsinghua Cloud](https://cloud.tsinghua.edu.
 and put it under the data directory. Then run `tar xvf pretrain.tar` to decompress it.
 
 ### BaseModel Training
+Open the directory "IncreProtoNet/BaseModel", and run the python file "train_demo.py". 
+The saved model are in the directory "IncreProtoNet/BaseModel/checkpoint/". 
+The specific commands and several important hyper-parameters are as follows:
 
 **Glove Embedding Command**
 ```bash
@@ -41,6 +44,9 @@ and put it under the data directory. Then run `tar xvf pretrain.tar` to decompre
 
 
 ### Incremental Model Training 
+Open the directory "IncreProtoNet/IncrementalFewShotModel", and run the python file "train_demo.py". 
+The saved model are in the directory "IncreProtoNet/IncrementalFewShotModel/checkpoint/". 
+The specific commands and several important hyper-parameters are as follows:
 
 **Glove Embedding Command**
 #### 1-shot 
