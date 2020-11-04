@@ -63,13 +63,16 @@ python3.6 train_demo.py --embedding_type glove --pl_weight 0.1 \
 **BERT Embedding Command**
 #### 1-shot 
 ```bash
-python3.6 train_demo.py --embedding_type bert --pl_weight 0.1 --base_lr 0.01 \
---train_baseN 30 --triplet_num 10 --margin 5.0 --learn_rate 1e-2 --K 1 --val_step 100 \
---val_iter 100 --max_length 60
+python3 train_demo.py --embedding_type bert \
+--pl_weight 0.1 --base_lr 0.01 --train_baseN 30 --triplet_num 10 --margin 10.0 \
+--learn_rate 1e-3 --K 1 --val_step 100 --val_iter 100 --max_length 60
 ```
 #### 5-shot
 ```bash
-Available Later 
+CUDA_VISIBLE_DEVICES=0,1,3 python3 train_demo.py --embedding_type bert \
+--pl_weight 0.1 --base_lr 0.01 --train_baseN 30 --triplet_num 10 \
+--margin 10.0 --learn_rate 2e-3 --K 5 --val_step 100 --val_iter 100 \
+--max_length 60 --test_Q 1
 ```
 |   Setting   |   Base   |   Novel  |   Both   |
 |:-----------:| :-------:| :-------:| :-------:|
