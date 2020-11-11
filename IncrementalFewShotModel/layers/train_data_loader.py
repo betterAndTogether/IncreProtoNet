@@ -45,10 +45,6 @@ class FewRelDataset(data.Dataset):
         base_label = []  # 不构建支持样本，但构建存在哪些baseRels
         query_set = {'word': [], 'pos1': [], 'pos2': [], 'mask': []}
         query_label = []
-        novel_query_set = {'word': [], 'pos1': [], 'pos2': [], 'mask': []}
-        novel_query_label = []
-        base_query_set = {'word': [], 'pos1': [], 'pos2': [], 'mask': []}
-        base_query_label = []
         triplet_base_set = {'word': [], 'pos1': [], 'pos2': [], 'mask': []}
         triplet_novel_set = {'word': [], 'pos1': [], 'pos2': [], 'mask': []}
 
@@ -135,69 +131,7 @@ class FewRelDataset(data.Dataset):
                 mask = torch.tensor(mask).long()
                 self.__additem__(triplet_base_set, word, pos1, pos2, mask)
 
-        """
-            base bi classifier query  shape=[baseN, 2Q]
-        """
-        for i, class_name in enumerate(baseClasses):
-            indices = np.random.choice(list(range(len(self.json_data[class_name]))), self.bi_pos_num, False)
-            for j in indices:
-                word, pos1, pos2, mask = self.__getraw__(self.json_data[class_name][j])
-                word = torch.tensor(word).long()
-                pos1 = torch.tensor(pos1).long()
-                pos2 = torch.tensor(pos2).long()
-                mask = torch.tensor(mask).long()
-                self.__additem__(base_query_set, word, pos1, pos2, mask)
-            base_query_label += [1] * self.bi_pos_num
-
-            # 选择负类
-            noise_classes = []
-            for rel in self.classes:
-                if rel != class_name:
-                    noise_classes.append(rel)
-            neg_classes = np.random.choice(noise_classes, self.bi_neg_num, replace=True)
-            for rel in neg_classes:
-                indice = np.random.choice(list(range(len(self.json_data[rel]))), 1, False)[0]
-                word, pos1, pos2, mask = self.__getraw__(self.json_data[rel][indice])
-                word = torch.tensor(word).long()
-                pos1 = torch.tensor(pos1).long()
-                pos2 = torch.tensor(pos2).long()
-                mask = torch.tensor(mask).long()
-                self.__additem__(base_query_set, word, pos1, pos2, mask)
-            base_query_label += [0] * self.bi_neg_num
-
-
-        """
-            Novel bi-classifier query shape=[novelN, 2Q]
-        """
-        for i, class_name in enumerate(novelClasses):
-            indices = np.random.choice(list(range(len(self.json_data[class_name]))), self.bi_pos_num, False)
-            for j in indices:
-                word, pos1, pos2, mask = self.__getraw__(self.json_data[class_name][j])
-                word = torch.tensor(word).long()
-                pos1 = torch.tensor(pos1).long()
-                pos2 = torch.tensor(pos2).long()
-                mask = torch.tensor(mask).long()
-                self.__additem__(novel_query_set, word, pos1, pos2, mask)
-            novel_query_label += [1] * self.bi_pos_num
-
-            # 选择负类
-            noise_classes = []
-            for rel in self.classes:
-                if rel != class_name:
-                    noise_classes.append(rel)
-            neg_classes = np.random.choice(noise_classes, self.bi_neg_num, replace=True)
-            for rel in neg_classes:
-                indice = np.random.choice(list(range(len(self.json_data[rel]))), 1, False)[0]
-                word, pos1, pos2, mask = self.__getraw__(self.json_data[rel][indice])
-                word = torch.tensor(word).long()
-                pos1 = torch.tensor(pos1).long()
-                pos2 = torch.tensor(pos2).long()
-                mask = torch.tensor(mask).long()
-                self.__additem__(novel_query_set, word, pos1, pos2, mask)
-            novel_query_label += [0] * self.bi_neg_num
-
-        return novelSupport_set, query_set, query_label, base_label, novel_query_set, novel_query_label, base_query_set, \
-               base_query_label, triplet_base_set, triplet_novel_set
+        return novelSupport_set, query_set, query_label, base_label, triplet_base_set, triplet_novel_set
 
     def __len__(self):
         return 999999999999999
@@ -216,17 +150,13 @@ def collate_fn(data):
     batch_triplet_base = {'word': [], 'pos1': [], 'pos2': [], 'mask': []}
     batch_triplet_novel = {'word': [], 'pos1': [], 'pos2': [], 'mask': []}
 
-    novelSupport_set, query_set, query_label, base_label,novel_query_set, novel_query_label, base_query_set, base_query_label, triplet_base_set, triplet_novel_set = zip(*data)
+    novelSupport_set, query_set, query_label, base_label, triplet_base_set, triplet_novel_set = zip(*data)
 
     for i in range(len(novelSupport_set)):
         for k in novelSupport_set[i]:
             batch_novelSupportSet[k] += novelSupport_set[i][k]
         for k in query_set[i]:
             batch_query[k] += query_set[i][k]
-        for k in novel_query_set[i]:
-            batch_novel_query[k] += novel_query_set[i][k]
-        for k in base_query_set[i]:
-            batch_base_query[k] += base_query_set[i][k]
         for k in triplet_base_set[i]:
             batch_triplet_base[k] += triplet_base_set[i][k]
         for k in triplet_novel_set[i]:
@@ -234,17 +164,11 @@ def collate_fn(data):
 
         batch_queryLabel += query_label[i]
         batch_baseLabel += base_label[i]
-        batch_novelQueryLabel += novel_query_label[i]
-        batch_baseQueryLabel += base_query_label[i]
 
     for k in batch_novelSupportSet:
         batch_novelSupportSet[k] = torch.stack(batch_novelSupportSet[k], 0)
     for k in batch_query:
         batch_query[k] = torch.stack(batch_query[k], 0)
-    for k in batch_novel_query:
-        batch_novel_query[k] = torch.stack(batch_novel_query[k], 0)
-    for k in batch_base_query:
-        batch_base_query[k] = torch.stack(batch_base_query[k], 0)
     for k in batch_triplet_base:
         batch_triplet_base[k] = torch.stack(batch_triplet_base[k], 0)
     for k in batch_triplet_novel:
@@ -252,11 +176,8 @@ def collate_fn(data):
 
     batch_baseLabel = torch.tensor(batch_baseLabel)
     batch_queryLabel = torch.tensor(batch_queryLabel)
-    batch_novelQueryLabel = torch.tensor(batch_novelQueryLabel)
-    batch_baseQueryLabel = torch.tensor(batch_baseQueryLabel)
 
-    return batch_novelSupportSet, batch_query, batch_queryLabel, batch_baseLabel, batch_novel_query, \
-           batch_novelQueryLabel, batch_base_query, batch_baseQueryLabel, batch_triplet_base, batch_triplet_novel
+    return batch_novelSupportSet, batch_query, batch_queryLabel, batch_baseLabel, batch_triplet_base, batch_triplet_novel
 
 
 def get_loader(data_file, baserel2index_file, encoder, batch_size,  baseN, novelN, K, Q, triplet_num, bi_pos_num, bi_neg_num, num_workers=4,  collate_fn=collate_fn):

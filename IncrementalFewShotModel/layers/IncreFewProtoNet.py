@@ -1,16 +1,10 @@
 # coding=utf-8
 import sys
 from os.path import normpath,join,dirname
-# 先引入根目录路径，以后的导入将直接使用当前项目的绝对路径
 sys.path.append(normpath(join(dirname(__file__), '..')))
 from torch import nn
 import torch
 from IncrementalFewShotModel.layers import framework as framework
-
-"""
-    这里编写自己的模型代码
-    该版本知识为了简单实现baseline, novelprototypes只是简单的使用求平均得到
-"""
 
 
 class IncreProto(framework.IncreFewShotREModel):
@@ -18,15 +12,8 @@ class IncreProto(framework.IncreFewShotREModel):
     def __init__(self, baseModel, Meta_CNN, topKEmbed, top_K):
         framework.IncreFewShotREModel.__init__(self, Meta_CNN)
 
-        """
-            冻结baseModel,训练的时候仍然需要过滤此类参数。
-        """
         self.baseModel = baseModel
-        """
-            模型需要使得 
-        """
         hidden_size = self.baseModel.prototypes.size(-1)
-        base_num_rels = self.baseModel.prototypes.size(0)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.base_linear_layer = nn.Linear(hidden_size, 1)
@@ -36,21 +23,10 @@ class IncreProto(framework.IncreFewShotREModel):
         self.top_K = top_K
         self.topKEmbed = torch.nn.Parameter(torch.tensor(topKEmbed), requires_grad=False).float()
 
-        self.base_belta = torch.nn.Parameter(torch.FloatTensor(1), requires_grad=True)
-        self.base_delta = torch.nn.Parameter(torch.FloatTensor(1), requires_grad=True)
-        self.base_belta.data.fill_(2.0)
-        self.base_delta.data.fill_(1.0)
-
-        self.novel_belta = torch.nn.Parameter(torch.FloatTensor(1), requires_grad=True)
-        self.novel_delta = torch.nn.Parameter(torch.FloatTensor(1), requires_grad=True)
-        self.novel_belta.data.fill_(2.0)
-        self.novel_delta.data.fill_(1.0)
-
         self.cost = nn.CrossEntropyLoss()
-        self.mseloss = nn.MSELoss(reduce=True, size_average=True)
 
     def forward(self, novelSupport_set, query_set, query_label, base_label, K, hidden_size, baseN, novelN, Q,
-                novel_query, novel_query_label, base_query, base_query_label, triplet_base, triplet_novel, triplet_num,
+                triplet_base, triplet_novel, triplet_num,
                 margin, biQ, triplet_loss_w, is_train):
         """
         :param novelSupport_set: shape=[B*novelN*K, max_length]
@@ -72,10 +48,7 @@ class IncreProto(framework.IncreFewShotREModel):
             sentence embedding 
         """
         with torch.no_grad():
-            # shape = [B*baseN*2*Q, hidden_size]
-            _, base_query = self.baseModel.sentence_encoder(base_query)
-            # shape = [B*novelN*2*Q, hidden_size]
-            novel_query_w, novel_query = self.baseModel.sentence_encoder(novel_query)
+
             # shape = [B*novelN*K, sen_len, hidden_size]
             novel_support_w, _ = self.baseModel.sentence_encoder(novelSupport_set)
             # shape=[B*(baseN+novelN)*Q, hidden_size]

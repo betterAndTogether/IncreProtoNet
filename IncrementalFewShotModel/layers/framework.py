@@ -13,7 +13,7 @@ class IncreFewShotREModel(nn.Module):
         self.MetaCNN_Encoder = nn.DataParallel(MetaCNN)
 
     def forward(self, novelSupport_set, query_set, query_label, base_label, K, hidden_size, baseN,
-                novelN, Q, novel_query, novel_query_label, base_query, base_query_label, triplet_base, triplet_novel, triplet_num, margin, biQ, triplet_loss_w, is_train):
+                novelN, Q, triplet_base, triplet_novel, triplet_num, margin, biQ, triplet_loss_w, is_train):
 
         raise NotImplementedError
 
@@ -74,30 +74,23 @@ class IncreFewShotREFramework:
         iter_sample = 0.0
         iter_loss = 0.0
         for it in range(start_iter, start_iter + train_iter):
-            novelSupport_set, query_set, query_label, base_label, novel_query_set, novel_query_label, base_query_set, base_query_label, triplet_base, triplet_novel = next(self.train_data_loader)
+            novelSupport_set, query_set, query_label, base_label, triplet_base, triplet_novel = next(self.train_data_loader)
 
             if torch.cuda.is_available():  # 实现gpu训练
                 for k in novelSupport_set:
                     novelSupport_set[k] = novelSupport_set[k].cuda()
                 for k in query_set:
                     query_set[k] = query_set[k].cuda()
-                for k in novel_query_set:
-                    novel_query_set[k] = novel_query_set[k].cuda()
-                for k in base_query_set:
-                    base_query_set[k] = base_query_set[k].cuda()
                 for k in triplet_base:
                     triplet_base[k] = triplet_base[k].cuda()
                 for k in triplet_novel:
                     triplet_novel[k] = triplet_novel[k].cuda()
                 query_label = query_label.cuda()
                 base_label = base_label.cuda()
-                novel_query_label = novel_query_label.cuda()
-                base_query_label = base_query_label.cuda()
 
             base_acc, novel_acc, both_acc, preds, loss, logits= model(novelSupport_set, query_set, query_label, base_label, K, hidden_size, train_baseN,
-                                     train_novelN, train_Q, novel_query_set, novel_query_label, base_query_set, base_query_label, triplet_base, triplet_novel, triplet_num,
+                                     train_novelN, train_Q, triplet_base, triplet_novel, triplet_num,
                                                                       margin, biQ, triplet_w, True)
-
 
             loss.backward()
             # 优化
@@ -143,24 +136,18 @@ class IncreFewShotREFramework:
         with torch.no_grad():
             for it in range(val_iter):
 
-                novelSupport_set, query_set, query_label, base_label, novel_query_set, novel_query_label, base_query_set, base_query_label = next(self.test_data_loader)
+                novelSupport_set, query_set, query_label, base_label = next(self.test_data_loader)
 
                 if torch.cuda.is_available():  # 实现gpu训练
                     for k in novelSupport_set:
                         novelSupport_set[k] = novelSupport_set[k].cuda()
                     for k in query_set:
                         query_set[k] = query_set[k].cuda()
-                    for k in novel_query_set:
-                        novel_query_set[k] = novel_query_set[k].cuda()
-                    for k in base_query_set:
-                        base_query_set[k] = base_query_set[k].cuda()
                     query_label = query_label.cuda()
                     base_label = base_label.cuda()
-                    novel_query_label = novel_query_label.cuda()
-                    base_query_label = base_query_label.cuda()
 
                 base_acc, novel_acc, both_acc, preds, loss, logits = model(novelSupport_set, query_set, query_label, base_label, K, hidden_size, test_baseN,
-                                     test_novelN, test_Q, novel_query_set, novel_query_label, base_query_set, base_query_label, None, None, 0,  0.0, biQ, 0.0, False)
+                                     test_novelN, test_Q, None, None, 0,  0.0, biQ, 0.0, False)
 
                 iter_sample += 1
                 iter_both_acc += self.item(both_acc.data)
