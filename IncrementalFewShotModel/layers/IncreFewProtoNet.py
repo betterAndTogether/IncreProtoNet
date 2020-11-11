@@ -89,16 +89,13 @@ class IncreProto(framework.IncreFewShotREModel):
         """
             base bi_classifier 
         """
-        # base_radius.shape=[B*baseN], base_prototypes.shape=[B, baseN, hidden_size]
-        base_radius, base_prototypes, base_loss, bi_base_acc = self.base_bi_classifier(base_query, base_query_label,
-                                                                                    base_label, baseN, biQ, hidden_size)
+        # base_prototypes.shape=[B, baseN, hidden_size]
+        base_prototypes = self.base_prototype_generator(base_label, baseN, hidden_size)
         """
            novel bi_classifier 
         """
-        # novel_radius.shape=[B*novelN], novel_prototypes.shape=[B, novelN, hidden_size]
-        novel_radius, novel_prototypes, novel_loss, bi_novel_acc = self.novel_bi_classifier(novel_support_w, novel_query_w, novel_query, base_prototypes,
-                                                                                         novel_query_label, novelN, K,
-                                                                                         biQ, hidden_size)
+        # novel_prototypes.shape=[B, novelN, hidden_size]
+        novel_prototypes = self.novel_prototype_generator(novel_support_w, novelN, K, hidden_size)
 
         """
             多分类
@@ -136,16 +133,10 @@ class IncreProto(framework.IncreFewShotREModel):
         if is_train:
             merge_base_query = self.merge_protoNet(triplet_query_base_w, triplet_query_base, novel_prototypes, base_prototypes, triplet_num*novelN, hidden_size)
             merge_novel_query = self.merge_protoNet(triplet_query_novel_w, triplet_query_novel, novel_prototypes, base_prototypes, triplet_num*novelN, hidden_size)
-            adapter_loss = self.novel_prototype_adapter(merge_base_query, merge_novel_query, novel_prototypes, triplet_num, margin, novelN, hidden_size)
-            # adapter_loss = self.prototype_loss(triplet_query_novel_w, novel_prototypes, triplet_num, margin, novelN, hidden_size)
-            # loss = base_loss + novel_loss + both_loss + 0.1 * adapter_loss
-            # loss = novel_loss + both_loss #+ 0.1 * adapter_loss
-            loss = both_loss + triplet_loss_w * adapter_loss
-            # loss = both_loss
+            triplet_loss = self.triplet_loss_calc(merge_base_query, merge_novel_query, novel_prototypes, triplet_num, margin, novelN, hidden_size)
+            loss = both_loss + triplet_loss_w * triplet_loss
         else:
-            # loss = base_loss + novel_loss + both_loss
-            # loss = both_loss
-            loss = novel_loss + both_loss
+            loss = both_loss
 
         return base_acc, novel_acc, both_acc, both_preds, loss, logits
 
@@ -208,7 +199,7 @@ class IncreProto(framework.IncreFewShotREModel):
 
         return merge_prototypes
 
-    def novel_prototype_adapter(self, triplet_query_base, triplet_query_novel, novel_prototypes,
+    def triplet_loss_calc(self, triplet_query_base, triplet_query_novel, novel_prototypes,
                                 triplet_num, margin, novelN, hidden_size):
         """
 
@@ -240,33 +231,11 @@ class IncreProto(framework.IncreFewShotREModel):
 
         return loss
 
-    def prototype_loss(self, triplet_query_novel_w, novel_prototypes, triplet_num, margin, novelN, hidden_size):
-        """
-        :param triplet_query_novel_w: shape =[B*novelN*triplet_num, sen_len, hidden_size]
-        :param novel_prototypes: shape=[B, novelN, hidden_size]
-        :param triplet_num:
-        :param margin:
-        :param novelN:
-        :param hidden_size:
-        :return:
-        """
-        # 使用meta_cnn编码
-        # shape = [B*novelN*tirplet_num, hidden_size]
-        triplet_query_novel = self.MetaCNN_Encoder(triplet_query_novel_w)
-        # shape=[B*novelN*triplet_num, hidden_size]
-        novel_prototypes = novel_prototypes.unsqueeze(2).expand(-1, -1, triplet_num, -1).reshape(-1, hidden_size)
-        loss = self.mseloss(triplet_query_novel, novel_prototypes)
-
-        return loss
-
-    def novel_bi_classifier(self, novel_support, novel_query_w, novel_query, base_prototypes, novel_query_label, novelN, K, biQ, hidden_size):
+    def novel_prototype_generator(self, novel_support, novelN, K, hidden_size):
         """
         :param novel_support: shape = [B*novelN*K, sen_len, hidden_size]
-        :param novel_query:
-        :param novel_query_label:
         :param novelN:
         :param K:
-        :param Q:
         :param hidden_size:
         :return:
         """
@@ -280,162 +249,16 @@ class IncreProto(framework.IncreFewShotREModel):
         # shape = [B, novelN, hidden_size]
         novel_prototypes = torch.mean(novel_support, 1).view(-1, novelN, hidden_size)
 
-        """
-            prototype attention 
-            # shape=[B*(baseN+novelN)*Q, hidden_size]
-            meta_both_query = self.MetaCNN_Encoder(both_query_w)
-            # shape=[B, (baseN+novelN)*Q, hidden_size], 即每个query都会有一个meta prototype
-            meta_merge_prototypes = self.mergePrototypes(meta_both_query, novel_prototypes, baseN, novelN, Q, hidden_size)
-            # shape=[B, (baseN+novelN)*Q, hidden_size]
-            base_merge_prototypes = self.mergePrototypes(both_query, base_prototypes, baseN, novelN, Q, hidden_size)
-            # shape=[B*(baseN+novelN)*Q, 1]
-            base_weight = torch.pow(meta_both_query - meta_merge_prototypes.view(-1, hidden_size), 2).sum(-1).unsqueeze(1)
-            # shape=[B*(baseN+novelN)*Q, 1]
-            meta_weight = torch.pow(both_query - base_merge_prototypes.view(-1, hidden_size), 2).sum(-1).unsqueeze(1)
-            # shape=[B*(baseN+novelN)*Q, 2, 1]
-            merge_weight = torch.softmax(torch.cat((-base_weight, -meta_weight), 1), -1).unsqueeze(2)
-            # shape=[B*(baseN+novelN)*Q, 2, hidden_size]
-            merge_query = torch.cat((both_query.unsqueeze(1), meta_both_query.unsqueeze(1)), 1)
-            # shape=[B*(baseN+novelN)*Q, hidden_size]
-            merge_representation = torch.sum(merge_query * merge_weight, 1)
-        """
-        # # shape=[B*novelN*biQ, hidden_size]
-        # meta_novel_query = self.MetaCNN_Encoder(novel_query_w)
-        # # shape=[B, novelN*biQ, hidden_size], 即每个query都会有一个meta prototype
-        # meta_novel_prototypes = self.mergePrototypes(meta_novel_query, novel_prototypes, novelN*biQ, hidden_size)
-        # # shape=[B, novelN*biQ, hidden_size]
-        # base_novel_prototypes = self.mergePrototypes(novel_query, base_prototypes, novelN*biQ, hidden_size)
-        # # shape=[B*(baseN+novelN)*Q, 1]
-        # base_weight = torch.pow(meta_novel_query - meta_novel_prototypes.view(-1, hidden_size), 2).sum(-1).unsqueeze(1)
-        # exit()
+        return novel_prototypes
 
-
-        """
-            bi_classifier 
-        """
-
-        # shape = [B, novelN]
-        novel_radius = self.novel_radius_measurement(novel_support, novel_prototypes, novelN, K, hidden_size)
-        # shape = [B*novelN, biQ, hidden_size]
-        novel_prototypes_re = novel_prototypes.view(-1, hidden_size).unsqueeze(1).expand(-1, biQ, -1)
-        # shape = [B*novelN, biQ, hidden_size]
-        novel_query = novel_query.view(-1, biQ, hidden_size)
-        # shape = [B*novelN, biQ, 1]
-        novel_dists = torch.pow(novel_query - novel_prototypes_re, 2).sum(-1).unsqueeze(2)
-        # shape = [B*novelN, biQ, 1]
-        novel_radius_re = novel_radius.unsqueeze(1).expand(-1, biQ).unsqueeze(2)
-        # shape = [B*novelN*biQ, 2]
-        novel_logits = torch.cat((novel_dists, novel_radius_re), -1).view(-1, 2)
-        novel_preds = torch.argmax(novel_logits, -1)
-        novel_acc = torch.mean((novel_preds.view(-1) == novel_query_label.view(-1)).type(torch.FloatTensor))
-        novel_loss = self.softmax_loss(novel_logits, novel_query_label)
-
-        return novel_radius, novel_prototypes, novel_loss, novel_acc
-
-    def base_bi_classifier(self, base_query, base_query_label, base_label, baseN, biQ, hidden_size):
-
-        # sum_Q = 2*Q
+    def base_prototype_generator(self, base_label, baseN, hidden_size):
 
         # shape = [B*baseN, topK, hidden_size]
         base_topKEmbed = self.topKEmbed.view(-1, self.top_K, hidden_size)[base_label].to(self.device)
         # shape = [B, baseN, hidden_size]
         base_prototypes = torch.mean(base_topKEmbed, 1).view(-1, baseN, hidden_size)
-        # shape = [B*baseN]
-        base_radius = self.base_radius_measurement(base_topKEmbed, base_prototypes, baseN, self.top_K, hidden_size)
 
-        # 计算base_query到base_prototype之间的距离
-        # shape =[B*baseN, 2*Q, hidden_size]
-        base_prototypes_re = base_prototypes.view(-1, hidden_size).unsqueeze(1).expand(-1, biQ, -1)
-        # shape = [B*baseN, 2*Q, hidden_size]
-        base_query = base_query.view(-1, biQ, hidden_size)
-        # shape = [B*baseN, 2*Q, 1]
-        base_dist = torch.pow(base_query - base_prototypes_re, 2).sum(-1).unsqueeze(2)
-        # shape = [B*baseN, 2*Q, 1]
-        base_radius_re = base_radius.unsqueeze(1).expand(-1, biQ).unsqueeze(2)
-        # shape = [B*baseN*2*Q, 2]
-        base_logits = torch.cat((base_dist, base_radius_re), -1).view(-1, 2)
-        base_preds = torch.argmax(base_logits, -1)
-        base_acc = torch.mean((base_preds.view(-1) == base_query_label.view(-1)).type(torch.FloatTensor))
-        base_loss = self.softmax_loss(base_logits, base_query_label)
-
-        return base_radius, base_prototypes, base_loss, base_acc
-
-    def novel_radius_measurement(self, novel_support, novel_prototypes, novelN, K, hidden_size):
-        """
-        :param novel_support: shape = [B*novelN, K, hidden_size]
-        :param novel_prototypes: shape = [B, novelN, hidden_size]
-        :return:
-        """
-        # shape = [B*novelN, hidden_size]
-        max_value, _ = novel_support.max(1)
-        min_value, _ = novel_support.min(1)
-        # shape = [B*novelN, hidden_size]
-        variable = max_value - min_value
-        alpha = self.novel_linear_layer(variable)
-        # shape = [B, novelN]
-        alpha = torch.tanh(alpha.squeeze(-1)).view(-1, novelN)
-
-        """
-            计算prototype到每个shot的距离 
-        """
-        # shape =[B*novelN, K, hidden_size]
-        novel_prototypes = novel_prototypes.view(-1, hidden_size).unsqueeze(1).expand(-1, K, -1)
-        # shape = [B*novelN, K]
-        dist = torch.pow(novel_support - novel_prototypes, 2).sum(-1)
-        # 方式一
-        # shape = [B*baseN]
-        mean_dist = torch.mean(dist, -1) * self.novel_belta
-        wids = mean_dist.view(-1, novelN) * (self.novel_delta + alpha)
-        wids = wids.view(-1)
-
-        # 方式二
-        # shape = [B*baseN]
-        # max_dist, _ = torch.max(dist, -1)
-        # wids = max_dist.view(-1, novelN) * (1.0 + alpha)
-        # wids = wids.view(-1)
-
-        # print("novel=========")
-        # print(wids)
-        # exit()
-
-        return wids
-
-    def base_radius_measurement(self, base_topKEmbed, base_prototypes, baseN, topK, hidden_size):
-        """
-        :param base_topKEmbed: shape = [B*baseN, topK, hidden_size]
-        :param base_prototypes: shape = [B, baseN, hidden_size]
-        :param baseN:
-        :param topK:
-        :param hidden_size:
-        :return:
-        """
-        """
-            捕捉每个关系的特征值浮动变化 
-        """
-        # shape=[B*baseN, hidden_size]
-        max_value, _ = base_topKEmbed.max(1)
-        min_value, _ = base_topKEmbed.min(1)
-        # shape = [B*baseN, hidden_size]
-        variable = max_value - min_value
-        alpha = self.base_linear_layer(variable)
-        alpha = torch.tanh(alpha.squeeze(-1)).view(-1, baseN)
-        """
-            计算prototype到每个shot的距离 
-        """
-        # shape =[B*baseN, topK, hidden_size]
-        base_prototypes = base_prototypes.view(-1, hidden_size).unsqueeze(1).expand(-1, topK, -1)
-        # shape = [B*baseN, topK]
-        dist = torch.pow(base_topKEmbed - base_prototypes, 2).sum(-1)
-        # shape = [B*baseN]
-        mean_dist = torch.mean(dist, -1) * self.base_belta
-        wids = mean_dist.view(-1, baseN) * (self.base_delta + alpha)
-        wids = wids.view(-1)
-        # 方式二
-        # shape = [B*baseN]
-        # max_dist, _ = torch.max(dist, -1)
-        # wids = max_dist.view(-1, baseN) * (1.0 + alpha)
-        # wids = wids.view(-1)
-        return wids
+        return base_prototypes
 
     def accuracy(self, pred, label, baseN, novelN, B, Q):
         """

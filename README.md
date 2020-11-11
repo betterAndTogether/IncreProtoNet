@@ -53,7 +53,7 @@ The specific commands and several important hyper-parameters are as follows:
 ```bash
 python3.6 train_demo.py --embedding_type glove --pl_weight 0.1 \
 --base_lr 0.1 --train_baseN 30 --triplet_num 10 --margin 5.0 \
---learn_rate 1e-1 --K 1
+--learn_rate 1e-1 --K 1 
 ```
 #### 5-shot
 ```bash
