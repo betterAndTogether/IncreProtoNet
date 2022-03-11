@@ -48,7 +48,6 @@ class IncreProto(framework.IncreFewShotREModel):
             sentence embedding 
         """
         with torch.no_grad():
-
             # shape = [B*novelN*K, sen_len, hidden_size]
             novel_support_w, _ = self.baseModel.sentence_encoder(novelSupport_set)
             # shape=[B*(baseN+novelN)*Q, hidden_size]

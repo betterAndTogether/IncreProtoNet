@@ -68,6 +68,8 @@ class IncreFewShotREFramework:
 
         start_iter = 0
         best_acc = 0.0
+        best_novel_acc = 0.0
+        best_base_acc = 0.0
         iter_both_acc = 0.0
         iter_base_acc = 0.0
         iter_novel_acc = 0.0
@@ -112,11 +114,35 @@ class IncreFewShotREFramework:
             if (it + 1) % val_step == 0:
                 base_acc, novel_acc, both_acc = self.eval(model, val_iter, K, hidden_size, test_baseN, test_novelN, test_Q, biQ)
                 model.train()
+                # impro_novel_acc = novel_acc - best_novel_acc
+                # impro_base_acc = base_acc - best_base_acc
+                # impro_both_acc = both_acc - best_acc
                 if both_acc > best_acc:
-                # if True:
                     print("Best checkpoint")
-                    torch.save({'state_dict':model.state_dict()}, save_ckpt)
+                    torch.save({'state_dict': model.state_dict()}, save_ckpt)
                     best_acc = both_acc
+
+                    # if (it+1) <= 400:  # 400为阈值，通过验证集判断模型稳定状态
+                    #     print("Best checkpoint")
+                    #     torch.save({'state_dict':model.state_dict()}, save_ckpt)
+                    #     best_acc = both_acc
+                    #     best_novel_acc = novel_acc
+                    #     best_base_acc = base_acc
+                    # else:
+                    #     if impro_novel_acc >= 0:  # 如果novel relation提升
+                    #         print("Best checkpoint")
+                    #         torch.save({'state_dict':model.state_dict()}, save_ckpt)
+                    #         best_acc = both_acc
+                    #         best_novel_acc = novel_acc
+                    #         best_base_acc = base_acc
+                    #     else:
+                    #         if impro_both_acc+impro_novel_acc > 0: # both的增益不能以损失novel的增益为代价
+                    #             print("Best checkpoint")
+                    #             torch.save({'state_dict':model.state_dict()}, save_ckpt)
+                    #             best_acc = both_acc
+                    #             best_novel_acc = novel_acc
+                    #             best_base_acc = base_acc
+
                 iter_sample = 0.0
                 iter_both_acc = 0.0
                 iter_base_acc = 0.0

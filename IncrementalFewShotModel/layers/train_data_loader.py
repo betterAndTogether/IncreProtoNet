@@ -6,7 +6,6 @@ import random
 import json
 
 
-
 class FewRelDataset(data.Dataset):
     """
     FewRel Dataset

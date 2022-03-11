@@ -75,10 +75,9 @@ python3 train_demo.py --embedding_type bert \
 ```
 #### 5-shot
 ```bash
-CUDA_VISIBLE_DEVICES=0,1,3 python3 train_demo.py --embedding_type bert \
---pl_weight 0.1 --base_lr 0.01 --train_baseN 30 --triplet_num 10 \
---margin 10.0 --learn_rate 2e-3 --K 5 --val_step 100 --val_iter 100 \
---max_length 60 --test_Q 1
+python3 train_demo.py --embedding_type bert --pl_weight 0.1 --base_lr 0.01 \
+--train_baseN 30 --train_novelN 10 --triplet_num 20 --margin 3.0 --learn_rate 2e-3 \
+--K 5 --val_step 100 --val_iter 100 --max_length 60 --test_Q 1 
 ```
 |   Setting   |   Base   |   Novel  |   Both   |
 |:-----------:| :-------:| :-------:| :-------:|

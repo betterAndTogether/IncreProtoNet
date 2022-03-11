@@ -23,6 +23,7 @@ from IncrementalFewShotModel.layers.MetaCNNEncoder import MetaCNN
 def main():
 
     parser = argparse.ArgumentParser()
+
     # shared parameter
     parser.add_argument("--baseNumRels", default=54, type=int, help="number of relations")
     parser.add_argument("--embedding_type", default="bert", type=str, help="bert or glove")
@@ -32,14 +33,14 @@ def main():
     parser.add_argument("--pos_embedding_dim", default=5, help="position embedding size")
     parser.add_argument("--pl_weight", default=1e-1, help="the weight for the prototype loss")
     parser.add_argument("--base_lr", default=1e-1, type=float, help="base model learning rate")
-    parser.add_argument("--base_train_iter", default=8000, help="base model train iter")
+    parser.add_argument("--base_train_iter", default=7000, help="base model train iter")
     parser.add_argument("--pretrain_ckpt", default="", help="bert ckpt")
 
     # DeepProtoNet paramenter
     parser.add_argument("--base_batch_size", default=100, type=int, help="batch_size")
 
     # FewProtoNet parameter
-    parser.add_argument("--train_baseN", default=10, type=int, help="trainN ways in training")
+    parser.add_argument("--train_baseN", default=5, type=int, help="trainN ways in training")
     parser.add_argument("--train_novelN", default=5, type=int, help="trainBaseN ways in training")
     parser.add_argument("--train_Q", default=5, type=int, help="Q number for each relation in training")
 
@@ -57,7 +58,7 @@ def main():
     parser.add_argument("--bi_neg_num", default=20, type=int, help="number of bi_neg_classifier learning")
     parser.add_argument("--bi_pos_num", default=1, type=int, help="number of bi_pos_classifier learning")
 
-    parser.add_argument("--train_iter", default=20000, type=int, help="number of training iterate")
+    parser.add_argument("--train_iter", default=4000, type=int, help="number of training iterate")
     parser.add_argument("--val_step", default=1000, type=int, help="valuation per val_steps")
     parser.add_argument("--val_iter", default=500, type=int, help="valuation iterates")
     parser.add_argument("--base_top_k", default=100, type=int, help="top k sentence for each base relations")
@@ -88,10 +89,9 @@ def main():
         is_bert = True
         # basemodel_ckpt = opt.basemodel_ckpt + "deepProto-bert-80.pth.tar"
         # fewrel
-        basemodel_ckpt = opt.basemodel_ckpt + "deepProto-{}-lr-{}-pl-{}.pth.tar".format("bert", opt.base_lr, opt.pl_weight)
+        basemodel_ckpt = opt.basemodel_ckpt + "deepProto-{}-lr-{}-pl-{}-{}.pth.tar".format("bert", opt.base_lr, opt.pl_weight, opt.base_train_iter)
 
     baseModel_ckpt = from_project_root(basemodel_ckpt)
-
 
     """
         输出模型基本信息 

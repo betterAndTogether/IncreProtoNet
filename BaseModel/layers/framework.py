@@ -103,9 +103,12 @@ class BaseREFramework:
             if (it + 1) % val_step == 0:
                 acc = self.eval(model, val_iter)
                 model.train()
+
                 if acc > best_acc:
+                # if True:
                     print("Best checkpoint")
-                    torch.save({'state_dict':model.state_dict()}, save_ckpt)
+                    save_ckpt_new = save_ckpt[:-8] + "-{}.pth.tar".format(it)
+                    torch.save({'state_dict':model.state_dict()}, save_ckpt_new)
                     best_acc = acc
 
     def eval(self, model, val_iter, ckpt=None):

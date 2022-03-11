@@ -34,7 +34,7 @@ def main():
     parser.add_argument("--val_iter", default=500, type=int, help="iterate steps in validation")
 
     parser.add_argument("--embedding_type", default="glove", help="bert or glove")
-    parser.add_argument("--pretrain_ckpt",default="", help="bert ckpt")
+    parser.add_argument("--pretrain_ckpt", default="", help="bert ckpt")
     # fewrel
     parser.add_argument("--dataset", default="fewrel", help="base data train path")
     parser.add_argument("--base_train_file", default="data/fewrel/base_train_fewrel.json", help="base data train path")
